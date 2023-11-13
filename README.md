@@ -59,7 +59,7 @@ We have analyzed the users' meta data and compared the difference for each data 
 - Bio length and whether an account has a bio or not.
 - Number of words and emojis in the bio.
 - Most used words in bio.
-- The ration of the followers count to the following count.
+- The ratio of the followers count to the following count.
 - Account creation year.
 - Valid location reported in the account.
 
@@ -77,7 +77,7 @@ We have analyzed the linguistic features of the tweets for both worlds. We have 
 - Number of and mosted used words with and without **Stop Words** (come from NLKT).
 - Number of tweets contianing questioning (serves the Doubt technique).
 - Number of entities (serves both the Name Calling and the Smears techniques).
-- Sarcasm and hate speech signals (serves the Loaded Language, Smears, and Glittering technique).
+- Sarcasm and hate speech signals (serves the Loaded Language, Smears, and Glittering techniques).
 - The presence of the Name Calling technique based on the combination of sarcasm and hate speech signal along with the presence of entities.
 
 From the above analysis we found that:
@@ -91,3 +91,35 @@ From the above analysis we found that:
 The reported insights along with all the possible coding of the propaganda techniques will be used as labeling functions.
 
 ### Labeling Functions
+
+The labeling functions are the distant supervision signals we rely on to label the tweets. We rely on the concept that a labeling function's signal is considered a *propaganda*/*transparent* label vote. They serve as crow-source labelers that we will aggregate their votes algorithmically via the **Label Model**. We have added labeling functions for each programmable tecnique of the propaganda techniques. Also, we utlized the help of a zero-shot model and a news-specific labeled dataset to serve as labeling functions. The complete list is as follows
+
+- User Meta Data Labeling Functions:
+  - Absence of a bio for an account (all tweets are propaganda).
+  - Absence of a location for an account (all tweets are propaganda).
+  - Account creation data in 2018-2019 (propaganda).
+  - Account creation data in 2011-2012 (transparent).
+  - Bio keywords, official, etc. (transparent).
+
+- Text Labeling FUnctions
+  - Text contains URL (transparent).
+  - Text contains user mentions (propaganda).
+  - Text contains pronouns (propaganda).
+  - Text contains question keyword (doubt technique) (propaganda).
+  - Labeling technique (ent + sarcasm) (propaganda).
+  - Labeling technique (ent + hate) (propaganda).
+  - Entities presence (labeling, smears).
+  - Loaded language, manual lexicon.
+  - Loaded language, proppy lexicon.
+  - Hate and sarcasm speech.
+  - Labeled dataset distant supervision using cosine similarity.
+  - Zero-Shot model vote as propaganda or transparent.
+  - Presence of slogans using regex patterns (propaganda).
+  - Presence of Ruductio Ad Hitlerum lexicons (propaganda).
+  - Presence of exaggeration tone using POS tags (propaganda).
+
+In the case of unbalanced datasets, it is recommended by the snorkel team to split labeling functions that produce multiple signals in order to understand and maximize the accuracy over each class. We follow this behavior and split the labeling functions that don't have a specific label appended to it from above into two labeling functions. We also have split each lexicon type in the proppy lexicons to use only the ones that maximized the label model performance.
+
+The total number of resulting labeling functions is 50 LFs. We used only the ones that maximized the performance of the label model while eliminating the ones that have high coverage and high accuracy as they are suspected of providing a majority class signal rather than providing a correct one. It is recommended by the Snorkel team to use only the labeling functions that we are sure to have at least 50% precision score on the unlabaled dataset by generalizing the score of the 500 labeled examples. It is recommened but not required. We used all the labeling functions that maximized the label model performance regardless of their precision score on the 500 labeled examples up to a threshold (>= 25%).
+
+[label model]
