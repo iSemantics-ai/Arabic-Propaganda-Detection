@@ -124,8 +124,14 @@ The total number of resulting labeling functions is 50 LFs. We used only the one
 
 In order to aggregate the labeling functions' votes, we trained a Probabilistic Graphical Model to learn the accuracies and correlation dependencies between the labeling functions and the true (*hidden*) label. We trained the label model using a constant learning rate scheduler and an Adam optimizer with a 0.05 warmup ratio. The number of training epochs picked is 2000 to ensure convergence. These settings along with tuning the L2 regularization parameters led to a label model that has 92 accuracy, 92 weighted-averaged F1, and 77 macro-averaged F1 scores on the 500 labeled examples. We then applied the label model on the entire unlabeled dataset and produced a weakly supervised one that has around 23% propaganda tweets. The weakly labeled dataset will be shared later.
 
-# Weakly Supervised Model
+## Weakly Supervised Model
 
 Now is the time for the end model training. Since the job of the label model is to produce weakly labeled data, we need to train an end discriminative model that generalizes over the data and fuses the noisy labels in it while ensuring the coverage of the correct ones. It is recommended to train the end model using a noise-aware objective (loss) function. We aimed to use the Active-Passive Losses from (SOMEWHERE). This type of noise-aware objective doesn't support unbalanced datasets, so we reverted back to using the weighted cross entropy based on the accepted signal (performance) we have from the label model. We picked AraBERT version 2 models as Autoencoders as they have been adapted to accepted processed text from Farasa that we used as the text processing tool throughout the project. (PERFORMANCE)
 
-# Fully Supervised Model
+## Fully Supervised Model
+
+To validate the worthiness of our weakly supervised model, we trained a fully supervised model on 80% of the labeled dataset (1680 tweets not including the test set). Initially we trained a shallow Logistic Regression baseline and obtained 90 accuracy, 90 weighted-averaged F1, and 72 macro-averaged F1 scores. Note that we have already surpassed these results using the label model. For the main fully supervised model we used the AraBERT version family autoencoders as we did in the fully supervised model. Again, we trained using a weighted cross entropy loss to overcome the class imbalance. The fully supervised model achieved 90 accuracy, 91 weighted-averaged F1, and 78 macro-averaged F1 scores.
+
+## Conclusion
+
+We made. Thanks!
