@@ -108,18 +108,24 @@ The labeling functions are the distant supervision signals we rely on to label t
   - Text contains question keywords (doubt technique) (propaganda).
   - Labeling technique (ent + sarcasm) (propaganda).
   - Labeling technique (ent + hate) (propaganda).
-  - Entities presence (labeling, smears).
+  - Entities presence (labeling and smears techniques).
   - Loaded language, manual lexicon.
   - Loaded language, proppy lexicon.
   - Hate and sarcasm speech.
   - Labeled dataset distant supervision using cosine similarity.
   - Zero-Shot model vote as propaganda or transparent.
   - Presence of slogans using regex patterns (propaganda).
-  - Presence of Reductio Ad Hitlerum lexicons (propaganda).
-  - Presence of exaggerated tone using POS tags (propaganda).
+  - Presence of Reductio Ad Hitlerum technique lexicons (propaganda).
+  - Presence of exaggerated tone technique using POS tags (propaganda).
 
-In the case of unbalanced datasets, it is recommended by the snorkel team to split labeling functions that produce multiple signals in order to understand and maximize the accuracy of each class. We follow this behavior and split the labeling functions that don't have a specific label appended to it from above into two labeling functions. We also have split each lexicon type in the proppy lexicons to use only the ones that maximized the label model performance.
+In the case of unbalanced datasets, it is recommended by the Snorkel team to split labeling functions that produce multiple signals in order to understand and maximize the accuracy of each class. We follow this behavior and split the labeling functions that don't have a specific label appended to it from above into two labeling functions. We also have split each lexicon type in the proppy lexicons to use only the ones that maximized the label model performance.
 
-The total number of resulting labeling functions is 50 LFs. We used only the ones that maximized the performance of the label model while eliminating the ones that have high coverage and high accuracy as they are suspected of providing a majority class signal rather than providing a correct one. It is recommended by the Snorkel team to use only the labeling functions so that we are sure to have at least a 50% precision score on the unlabeled dataset by generalizing the score of the 500 labeled examples. It is recommended but not required. We used all the labeling functions that maximized the label model performance regardless of their precision score on the 500 labeled examples up to a threshold (>= 25%).
+The total number of resulting labeling functions is 50 LFs. We used only the ones that maximized the performance of the label model while eliminating the ones that have high coverage and high accuracy as they are suspected of providing a majority class signal rather than providing a correct one. It is also recommended by the Snorkel team to use only the labeling functions that we are sure to have at least a 50% precision score on the unlabeled dataset by generalizing the score of the 500 labeled examples. It is recommended but not required. We used all the labeling functions that maximized the label model performance regardless of their precision score on the 500 labeled examples up to a threshold (>= 20%).
 
-[label model]
+In order to aggregate the labeling functions' votes, we trained a Probabilistic Graphical Model to learn the accuracies and correlation dependencies between the labeling functions and the true (*hidden*) label. We trained the label model using a constant learning rate scheduler and an Adam optimizer with a 0.05 warmup ratio. The number of training epochs picked is 2000 to ensure convergence. These settings along with tuning the L2 regularization parameters led to a label model that has 92 accuracy, 92 weighted-averaged F1, and 77 macro-averaged F1 scores on the 500 labeled examples. We then applied the label model on the entire unlabeled dataset and produced a weakly supervised one that has around 23% propaganda tweets. The weakly labeled dataset will be shared later.
+
+# Weakly Supervised Model
+
+Now is the time for the end model training. Since the job of the label model is to produce weakly labeled data, we need to train an end discriminative model that generalizes over the data and fuses the noisy labels in it while ensuring the coverage of the correct ones. It is recommended to train the end model using a noise-aware objective (loss) function. We aimed to use the Active-Passive Losses from (SOMEWHERE). This type of noise-aware objective doesn't support unbalanced datasets, so we reverted back to using the weighted cross entropy based on the accepted signal (performance) we have from the label model. We picked AraBERT version 2 models as Autoencoders as they have been adapted to accepted processed text from Farasa that we used as the text processing tool throughout the project. (PERFORMANCE)
+
+# Fully Supervised Model
